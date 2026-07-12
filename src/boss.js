@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { scene, squad, state, sfx, ui, bosses, bullets, _bs, _bp, _bq, _bm } from './core/context.js';
 import { diffAt, SQUAD_X_LIMIT } from './config.js';
-import { spawnBurst, gore, spawnBloodPool, throwSkull, spawnShockwave, spawnSpikePatch } from './effects.js';
+import { spawnBurst, spawnBloodPool, throwSkull, spawnShockwave, spawnSpikePatch } from './effects.js';
 import { loseSoldiers } from './game.js';
 import { floatText, showBanner } from './ui/hud.js';
 

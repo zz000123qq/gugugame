@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import {
-  scene, state, squad, sfx, bullets, enemyBullets, zombies, bosses, gates,
+  scene, squad, bullets, enemyBullets, zombies, bosses, gates,
   _bm, _bq, _bs, _bp, _bc, _yAxis, squadRadius,
 } from './core/context.js';
 import { MAX_BULLETS, MAX_ENEMY_BULLETS, GATE_W, GATE_H } from './config.js';

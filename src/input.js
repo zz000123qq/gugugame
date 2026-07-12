@@ -21,13 +21,13 @@ window.addEventListener('keyup', (e) => { keys[e.code] = false; });
   const joyKnob = document.getElementById('joyKnob');
   if (!joyBase || !joyKnob) return;
   const JOY_R = 46; // 旋钮最大横向位移
-  let active = false, id = null, cx = 0, cy = 0, lastX = 0;
+  let active = false, id = null, cx = 0, lastX = 0;
   const onDown = (e) => {
     active = true; id = e.pointerId;
     const r = joyBase.getBoundingClientRect();
-    cx = r.left + r.width / 2; cy = r.top + r.height / 2;
+    cx = r.left + r.width / 2;
     lastX = e.clientX;
-    if (joyBase.setPointerCapture) { try { joyBase.setPointerCapture(id); } catch (_) {} }
+    if (joyBase.setPointerCapture) { try { joyBase.setPointerCapture(id); } catch {} }
     e.preventDefault();
   };
   const onMove = (e) => {

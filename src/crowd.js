@@ -8,6 +8,11 @@ const _mat = new THREE.Matrix4();
  * 每个个体只需提供 { x, z, rotY, phase, scale }，整体每帧只有几个 draw call。
  */
 export class CrowdRenderer {
+  /**
+   * @param {Scene} scene
+   * @param {Parts} parts
+   * @param {number} maxCount
+   */
   constructor(scene, parts, maxCount) {
     this.maxCount = maxCount;
     this.facing = 0; // 朝向偏置（弧度）：每只个体绕自身竖轴旋转，用于企鹅「面向镜头/背向奔跑」切换
@@ -25,6 +30,12 @@ export class CrowdRenderer {
     });
   }
 
+  /**
+   * @param {Agent[]} agents
+   * @param {number} time
+   * @param {number} [bobAmp]
+   * @param {number} [bobSpeed]
+   */
   update(agents, time, bobAmp = 0.07, bobSpeed = 10) {
     const n = Math.min(agents.length, this.maxCount);
     for (const mesh of this.meshes) mesh.count = n;
@@ -49,6 +60,9 @@ export class CrowdRenderer {
     for (const mesh of this.meshes) mesh.instanceMatrix.needsUpdate = true;
   }
 
+  /**
+   * @param {boolean} v
+   */
   setVisible(v) {
     for (const mesh of this.meshes) mesh.visible = v;
   }
@@ -57,6 +71,7 @@ export class CrowdRenderer {
 const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
 const mat = (color, opts = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.85, ...opts });
 
+/** @returns {Parts} */
 export function soldierParts() {
   return [
     { geometry: box(0.34, 0.36, 0.22), material: mat(0x2a3550), position: [0, 0.18, 0] },          // 腿
@@ -143,6 +158,7 @@ function zombieAnatomy(o) {
 }
 
 /** 普通僵尸：佝偻、绿皮、红眼 */
+/** @returns {Parts} */
 export function zombieParts(palette = {}) {
   const {
     legs = 0x3d4a2c,
@@ -153,6 +169,7 @@ export function zombieParts(palette = {}) {
 }
 
 /** 恶魔猎手：瘦削、红肤、黄色利爪、前倾猛扑姿态 */
+/** @returns {Parts} */
 export function hunterParts() {
   return zombieAnatomy({
     skin: 0xc4553c, shirt: 0x8a2a22, pants: 0x5a1e1e, shoe: 0x3a1414,
@@ -161,6 +178,7 @@ export function hunterParts() {
 }
 
 /** 憎恶屠夫：壮硕、灰肤、右手握巨型肉钩刀 */
+/** @returns {Parts} */
 export function butcherParts() {
   const parts = zombieAnatomy({
     skin: 0x9aa4b0, shirt: 0x4a525e, pants: 0x2c3038, shoe: 0x222428,
@@ -175,6 +193,7 @@ export function butcherParts() {
 }
 
 /** 暗影芭比：半透明飘浮长袍 + 兜帽 + 紫色缝隙眼（无腿，靠几何体悬空） */
+/** @returns {Parts} */
 export function shadowParts() {
   const robe = 0x453a5e, hood = 0x2a2438, glow = 0x9b7bff;
   const parts = [];
@@ -188,6 +207,7 @@ export function shadowParts() {
 }
 
 /** 巫蛊术尸：绿色长裙 + 尖顶女巫帽 + 法杖宝珠（半实体，轻微悬空） */
+/** @returns {Parts} */
 export function witchParts() {
   const dress = 0x2a6a58, skin = 0x58c4a8, glow = 0x7dffd0, hat = 0x14352c;
   const parts = [];
@@ -204,6 +224,7 @@ export function witchParts() {
 }
 
 /** 嗜血女妖：半透明幽魂长裙 + 飘散长发 + 尖叫口 + 上扬双臂（无腿，强悬空） */
+/** @returns {Parts} */
 export function bansheeParts() {
   const gown = 0x6a2a58, skin = 0xe8c0d8, glow = 0xff7ad0, hair = 0x3a1530;
   const parts = [];
@@ -219,6 +240,7 @@ export function bansheeParts() {
 }
 
 /** 被感染的士兵僵尸：残破军装 + 病变绿皮发光眼 + 仍端着步枪（细节增强） */
+/** @returns {Parts} */
 export function infectedSoldierParts() {
   const pants = 0x2c3328, uniform = 0x3e5a44, belt = 0x252a22, skin = 0x8fc46a, helmet = 0x37432e, gun = 0x1c1c20;
   const parts = [];
@@ -239,6 +261,7 @@ export function infectedSoldierParts() {
  *            黑色刘海/侧发 + 青色发夹 + 银项圈 + 上举鳍翅 + 黄蹼足 + 尾鳍
  * 全部基础几何体，零下载，InstancedMesh 友好
  */
+/** @returns {Parts} */
 export function penguinParts() {
   /* ── 配色（对照参考图取色）── */
   const DARK     = 0x2c3546;   // 深蓝灰 — 兜帽/背/翅

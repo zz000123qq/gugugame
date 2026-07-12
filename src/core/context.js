@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { CrowdRenderer, soldierParts, zombieParts } from '../crowd.js';
 import { SFX } from '../audio.js';
 import {
-  MAX_SOLDIER_RENDER, MAX_ZOMBIE_RENDER, BASE_SPACING, MAX_SQUAD_RADIUS,
+  MAX_SOLDIER_RENDER, BASE_SPACING, MAX_SQUAD_RADIUS,
   FIRST_BOSS_AT, ZOMBIE_TYPES, ZOMBIE_TYPE_KEYS,
 } from '../config.js';
 import { getBest } from '../progression.js';
@@ -47,6 +47,7 @@ window.addEventListener('resize', () => {
 // ---- 音效与游戏状态
 export const sfx = new SFX();
 
+/** @type {GameState} */
 export const state = {
   phase: 'menu',            // menu | run | result
   dist: 0,
@@ -93,6 +94,7 @@ export const state = {
   _lastStreakBanner: 0,
 };
 
+/** @type {{x:number, z:number, targetX:number, speed:number}} */
 export const squad = { x: 0, z: 0, targetX: 0, speed: 8.5 };
 
 // ---- UI 元素引用

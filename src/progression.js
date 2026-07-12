@@ -50,7 +50,7 @@ export function loadSave() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (raw) data = JSON.parse(raw);
-  } catch (e) { data = null; }
+  } catch { data = null; }
 
   const def = defaultSave();
   if (!data || typeof data !== 'object') {
@@ -73,7 +73,7 @@ export function loadSave() {
 }
 
 export function persist() {
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(loadSave())); } catch (e) { /* 隐私模式忽略 */ }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(loadSave())); } catch { /* 隐私模式忽略 */ }
 }
 
 // ---- 读取接口 ----
@@ -81,10 +81,12 @@ export const getCoins = () => loadSave().coins;
 export const getBest = () => loadSave().best;
 export const getUpgradeLevel = (id) => loadSave().upgrades[id] || 0;
 export const getUnlockedWeapons = () => loadSave().weapons.slice();
+/** @returns {string} */
 export const getLoadout = () => loadSave().loadout;
 export const isWeaponUnlocked = (id) => loadSave().weapons.includes(id);
 
 // 汇总当前所有升级效果，开局调用一次即可
+/** @returns {EffectsResult} */
 export function getEffects() {
   const s = loadSave();
   return {
@@ -98,6 +100,10 @@ export function getEffects() {
 
 // ---- 写入接口 ----
 // 购买/升级：成功返回 true
+/**
+ * @param {string} id
+ * @returns {boolean}
+ */
 export function buyUpgrade(id) {
   const s = loadSave();
   const def = UPGRADES[id];
@@ -120,6 +126,10 @@ export function nextUpgradeCost(id) {
   return lv >= def.max ? null : def.cost(lv);
 }
 
+/**
+ * @param {string} id
+ * @returns {boolean}
+ */
 export function buyWeapon(id) {
   const s = loadSave();
   const info = WEAPON_SHOP[id];
@@ -131,6 +141,10 @@ export function buyWeapon(id) {
   return true;
 }
 
+/**
+ * @param {string} id
+ * @returns {boolean}
+ */
 export function selectLoadout(id) {
   const s = loadSave();
   if (!s.weapons.includes(id)) return false;
@@ -142,6 +156,12 @@ export function selectLoadout(id) {
 // ---- 结算：把一局的战果换成末日币并写入统计 / 最佳 ----
 // bonusCoins: 本局通过"金币门"等途径直接获得的末日币，额外计入
 // 返回 { earned, total, isRecord }
+/**
+ * @param {number} dist
+ * @param {number} kills
+ * @param {number} [bonusCoins]
+ * @returns {SettleResult}
+ */
 export function settleRun(dist, kills, bonusCoins = 0) {
   const s = loadSave();
   const eff = UPGRADES.greed.effect(s.upgrades.greed);

@@ -18,6 +18,11 @@ const TARGET_HEIGHT = 1.15; // 与士兵同高，队伍风格统一
  * 把模型烘焙为「单网格 + 单材质」的独立零件（position=[0,0,0]），
  * 这样整队企鹅只需 1 个 InstancedMesh（1 个 draw call）。
  */
+/**
+ * @param {string} skinName
+ * @param {string} url
+ * @returns {Promise<Parts>}
+ */
 export function loadSkin(skinName, url) {
   return new Promise((resolve, reject) => {
     _loader.load(
@@ -35,6 +40,10 @@ export function loadSkin(skinName, url) {
   });
 }
 
+/**
+ * @param {Object3D} root
+ * @returns {Parts}
+ */
 function gltfToParts(root) {
   root.updateMatrixWorld(true);
 
@@ -93,6 +102,12 @@ function normalizeGeo(geo) {
 /**
  * 替换士兵群渲染器的皮肤：销毁旧 InstancedMesh，用新 parts 重建。
  * parts 约定见 crowd.js：{ geometry, material, position }
+ */
+/**
+ * @param {import('./crowd.js').CrowdRenderer} crowdRenderer
+ * @param {Scene} scene
+ * @param {Parts} newParts
+ * @param {number} maxCount
  */
 export function swapSkin(crowdRenderer, scene, newParts, maxCount) {
   for (const mesh of crowdRenderer.meshes) {

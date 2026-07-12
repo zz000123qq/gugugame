@@ -1,6 +1,6 @@
 // ============================================================ 门（增益 / 削弱 / 武器 / 特殊）
 import * as THREE from 'three';
-import { scene, state, squad, sfx, ui, gates } from './core/context.js';
+import { scene, state, sfx, ui, gates } from './core/context.js';
 import { WEAPONS, WEAPON_KEYS, ROAD_W, GATE_W, GATE_H, SQUAD_X_LIMIT, diffAt, rngPick } from './config.js';
 import { floatText } from './ui/hud.js';
 import { spawnBurst } from './effects.js';
@@ -81,7 +81,6 @@ export function drawGateCanvas(gate) {
     }
   }
   gate.tex.needsUpdate = true;
-  const [f0] = gateColor(gate);
   if (gate.op === 'weapon') {
     if (gate.remaining <= 0) { gate.frameMat.color.set(0xbfffc8); gate.frameMat.emissive.set(0x22bb44); }
     else { gate.frameMat.color.set(0xffe2a0); gate.frameMat.emissive.set(0xcc8800); }

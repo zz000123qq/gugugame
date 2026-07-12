@@ -350,7 +350,6 @@ export class SFX {
   // 企鹅的"嘎"是带气息感的短促鸣叫：方波基频 + 泛音 + 一点带通噪声做"嘎"的颗粒感
   _pengChirp({ freq = 480, dur = 0.13, slideTo = 0, breath = 0.06, vol = 0.18, delay = 0 } = {}) {
     if (!this.ctx) return;
-    const t = this.ctx.currentTime + delay;
     const end = slideTo > 0 ? slideTo : freq * 0.78;
     // 鸣管基频（方波，略带下滑 -> 圆润的"gu/ga"）
     this._tone({ freq, dur, type: 'square', vol, slideTo: end, delay, attack: 0.005 });

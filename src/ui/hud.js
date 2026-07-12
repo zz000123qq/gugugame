@@ -1,5 +1,4 @@
 // ============================================================ UI / HUD
-import * as THREE from 'three';
 import { camera, squad, state, ui, bosses, _proj } from '../core/context.js';
 
 export function showBanner(text, color) {

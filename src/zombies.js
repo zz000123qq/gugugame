@@ -1,6 +1,6 @@
 // ============================================================ 僵尸（生成 + 每帧移动/技能/碰撞）
 import * as THREE from 'three';
-import { scene, squad, state, sfx, zombies, bullets, squadRadius } from './core/context.js';
+import { squad, state, sfx, zombies, bullets, squadRadius } from './core/context.js';
 import { ZOMBIE_TYPES, ZOMBIE_TYPE_KEYS, diffAt, MAX_ZOMBIE_RENDER, ROAD_W } from './config.js';
 import { gore, spawnBurst, throwSkull } from './effects.js';
 import { spawnEnemyBullet } from './bullets.js';
