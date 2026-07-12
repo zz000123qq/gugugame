@@ -35,4 +35,3 @@ test/_ai_backup/
 # Debug / demo artifacts (not referenced by the game; safe to drop)
 public/*demo*.html
 public/viewer.html
-public/gugugaga.glb
