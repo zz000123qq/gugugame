@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>末日之门 · Doomsday Gates</title>
+  <style>
+    :root {
+      --blue: #3aa0ff;
+      --red: #ff5a5a;
+      --gold: #ffd24a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #120d1a; }
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", -apple-system, "Segoe UI", sans-serif;
+      color: #fff;
+      -webkit-user-select: none; user-select: none;
+      touch-action: none;
+    }
+    #app { position: fixed; inset: 0; }
+    canvas { display: block; }
+
+    /* ---------- HUD ---------- */
+    #hud { position: fixed; inset: 0; pointer-events: none; display: none; }
+    #hud.visible { display: block; }
+
+    #topbar {
+      position: absolute; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+      width: min(520px, 78vw); display: flex; align-items: center; gap: 12px;
+    }
+    #levelTag {
+      flex: none; padding: 6px 14px; border-radius: 999px;
+      background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.18);
+      font-weight: 700; font-size: 14px; letter-spacing: 1px;
+      text-shadow: 0 1px 2px rgba(0,0,0,.6);
+    }
+    #progressTrack {
+      flex: 1; height: 10px; border-radius: 999px;
+      background: rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.15);
+      overflow: hidden;
+    }
+    #progressFill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #38e07b, #a5f36b);
+      border-radius: 999px; transition: width .15s linear;
+    }
+    #progressFlag { flex: none; font-size: 16px; }
+
+    #countBadge {
+      position: absolute; transform: translate(-50%, -100%);
+      padding: 3px 12px; border-radius: 999px;
+      background: linear-gradient(180deg, #2e9bff, #1668d8);
+      border: 2px solid rgba(255,255,255,.85);
+      font-weight: 800; font-size: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.45);
+      white-space: nowrap;
+    }
+
+    #bossbar {
+      position: absolute; top: 44px; left: 50%; transform: translateX(-50%);
+      width: min(420px, 70vw); display: none;
+    }
+    #bossbar.visible { display: block; }
+    #bossbar .label { text-align: center; font-size: 13px; font-weight: 800; color: #ffb0b0; letter-spacing: 3px; margin-bottom: 4px; text-shadow: 0 1px 3px #000; }
+    #bossbar .track { height: 12px; border-radius: 999px; background: rgba(0,0,0,.55); border: 1px solid rgba(255,120,120,.4); overflow: hidden; }
+    #bossbar .fill { height: 100%; width: 100%; background: linear-gradient(90deg, #ff4040, #ff8a3d); }
+
+    #muteBtn {
+      position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); pointer-events: auto;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; font-size: 18px; cursor: pointer;
+    }
+    #pauseBtn {
+      position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(62px, calc(env(safe-area-inset-right) + 48px)); pointer-events: auto;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; font-size: 16px; cursor: pointer; z-index: 6;
+    }
+
+    #weaponTag {
+      position: absolute; bottom: max(22px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+      padding: 8px 22px; border-radius: 999px;
+      background: rgba(0,0,0,.5); border: 1px solid rgba(255,210,74,.5);
+      font-weight: 800; font-size: 16px; letter-spacing: 1px;
+      color: var(--gold); text-shadow: 0 1px 3px #000;
+      white-space: nowrap;
+    }
+    #buffRow {
+      position: absolute; bottom: max(68px, calc(env(safe-area-inset-bottom) + 46px)); left: 50%; transform: translateX(-50%);
+      display: flex; gap: 8px;
+    }
+    .buffChip {
+      padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 800;
+      background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.3);
+      text-shadow: 0 1px 2px #000;
+    }
+
+    #banner {
+      position: absolute; top: 34%; left: 50%; transform: translate(-50%, -50%) scale(.5);
+      font-size: clamp(30px, 7vw, 54px); font-weight: 900; letter-spacing: 6px;
+      color: #ffe9a8; text-shadow: 0 0 30px rgba(255,170,60,.8), 0 3px 8px #000;
+      opacity: 0; pointer-events: none; white-space: nowrap;
+    }
+    #banner.show { animation: bannerPop 1.8s ease-out forwards; }
+    @keyframes bannerPop {
+      0%   { opacity: 0; transform: translate(-50%, -50%) scale(.5); }
+      15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+      25%  { transform: translate(-50%, -50%) scale(1); }
+      75%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -70%) scale(1); }
+    }
+
+    #flash {
+      position: fixed; inset: 0; background: #fff; opacity: 0;
+      pointer-events: none; z-index: 5;
+    }
+    #flash.boom { animation: nukeFlash .7s ease-out forwards; }
+    @keyframes nukeFlash {
+      0% { opacity: 0; } 12% { opacity: .95; } 100% { opacity: 0; }
+    }
+
+    /* Floating math text */
+    .floatText {
+      position: absolute; transform: translate(-50%, -50%);
+      font-size: 30px; font-weight: 900; pointer-events: none;
+      text-shadow: 0 2px 6px rgba(0,0,0,.7);
+      animation: floatUp 1.1s ease-out forwards;
+    }
+    .floatText.good { color: var(--blue); }
+    .floatText.bad  { color: var(--red); }
+    @keyframes floatUp {
+      0%   { opacity: 0; transform: translate(-50%, -40%) scale(.6); }
+      15%  { opacity: 1; transform: translate(-50%, -60%) scale(1.15); }
+      100% { opacity: 0; transform: translate(-50%, -180%) scale(1); }
+    }
+
+    /* ---------- overlays ---------- */
+    .overlay {
+      position: fixed; inset: 0; display: none;
+      align-items: center; justify-content: center; flex-direction: column;
+      background: radial-gradient(ellipse at 50% 35%, rgba(40,25,60,.82), rgba(8,5,14,.94));
+      text-align: center; z-index: 10;
+    }
+    .overlay.visible { display: flex; }
+    .overlay h1 {
+      font-size: clamp(38px, 8vw, 64px); font-weight: 900; letter-spacing: 6px;
+      background: linear-gradient(180deg, #ffe9a8, #ff9d3d);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 4px 14px rgba(255,150,50,.35));
+      margin-bottom: 10px;
+    }
+    .overlay h2 { font-size: clamp(26px, 6vw, 44px); font-weight: 900; letter-spacing: 4px; margin-bottom: 14px; }
+    .overlay .sub { color: #cbbfe0; font-size: 15px; line-height: 1.9; margin-bottom: 30px; }
+    .overlay .sub b.blue { color: var(--blue); }
+    .overlay .sub b.red { color: var(--red); }
+    .overlay .sub b.gold { color: var(--gold); }
+    .btn {
+      pointer-events: auto; cursor: pointer; border: none; outline: none;
+      padding: 15px 52px; border-radius: 999px;
+      font-size: 20px; font-weight: 900; letter-spacing: 3px; color: #4a2600;
+      background: linear-gradient(180deg, #ffe259, #ffa751);
+      box-shadow: 0 6px 0 #b96c17, 0 12px 26px rgba(0,0,0,.5);
+      transition: transform .08s ease;
+    }
+    .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #b96c17, 0 6px 14px rgba(0,0,0,.5); }
+    .btn:disabled { cursor: progress; opacity: .55; filter: grayscale(.4); box-shadow: 0 6px 0 #b96c17, 0 12px 26px rgba(0,0,0,.5); }
+    .btn.secondary {
+      margin-top: 16px; padding: 10px 34px; font-size: 15px; color: #ddd;
+      background: rgba(255,255,255,.1); box-shadow: none; border: 1px solid rgba(255,255,255,.25);
+    }
+    #resultStats { font-size: 17px; color: #efe6ff; margin-bottom: 26px; line-height: 2; }
+    #resultTitle.win  { color: #7dff9b; text-shadow: 0 0 24px rgba(90,255,140,.4); }
+    #resultTitle.lose { color: #ff6d6d; text-shadow: 0 0 24px rgba(255,80,80,.4); }
+
+    /* ---------- 暂停菜单 / 移动端摇杆 ---------- */
+    .overlay { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+    #pauseOverlay { z-index: 11; }
+    #pausePanel {
+      background: rgba(18,12,28,.92); border: 1px solid rgba(255,255,255,.16);
+      border-radius: 18px; padding: 28px 40px; display: flex; flex-direction: column;
+      gap: 13px; align-items: center; min-width: 220px;
+    }
+    #pausePanel h2 { font-size: clamp(26px, 6vw, 40px); margin-bottom: 4px; }
+    #pausePanel .btn { width: 100%; min-width: 200px; }
+    #joyBase {
+      position: fixed; left: max(22px, env(safe-area-inset-left)); bottom: max(26px, env(safe-area-inset-bottom));
+      width: 120px; height: 120px; border-radius: 50%;
+      background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.22);
+      display: none; z-index: 6; touch-action: none;
+    }
+    #joyKnob {
+      position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; border-radius: 50%;
+      margin: -27px 0 0 -27px;
+      background: rgba(58,160,255,.45); border: 2px solid rgba(255,255,255,.55);
+      transition: transform .05s linear;
+    }
+    @media (pointer: coarse) {
+      #joyBase { display: block; pointer-events: auto; }
+    }
+
+    /* ---------- 角色选择 ---------- */
+    #charSelect {
+      display: flex; gap: 16px; margin-bottom: 24px; justify-content: center;
+    }
+    .charCard {
+      width: 140px; padding: 14px 10px; border-radius: 14px;
+      background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.15);
+      cursor: pointer; transition: all .2s ease; text-align: center;
+      user-select: none; -webkit-user-select: none;
+    }
+    .charCard:hover { border-color: rgba(255,255,255,.35); background: rgba(255,255,255,.12); }
+    .charCard.selected { border-color: var(--blue); background: rgba(58,160,255,.18); box-shadow: 0 0 18px rgba(58,160,255,.3); }
+    .charCard .emoji { font-size: 36px; display: block; margin-bottom: 6px; }
+    .charCard .name { font-size: 14px; font-weight: 800; color: #ddd; }
+    .charCard .desc { font-size: 11px; color: #999; margin-top: 3px; }
+    .charCard .sfxHint { font-size: 10px; color: var(--gold); margin-top: 6px; opacity: .7; }
+    .charCard.selected .sfxHint { opacity: 1; }
+    #charLoadStatus { font-size: 13px; color: var(--gold); min-height: 20px; margin-bottom: 8px; }
+
+    /* ---------- 兵工厂 / 商店 ---------- */
+    #menuCoins { font-size: 15px; color: var(--gold); margin: 4px 0 16px; font-weight: 800; }
+    #menuCoins b { font-size: 19px; }
+    #shopBtn { margin-top: 14px; }
+    #shopOverlay { z-index: 11; overflow-y: auto; padding: 40px 0; }
+    #shopOverlay h2 { color: #ffe9a8; -webkit-text-fill-color: initial; background: none; }
+    .shopCoins { font-size: 17px; color: var(--gold); font-weight: 800; margin-bottom: 20px; }
+    .shopCoins b { font-size: 22px; }
+    .shopSection { width: min(700px, 92vw); margin-bottom: 20px; }
+    .shopSection .secTitle { text-align: left; font-size: 12px; letter-spacing: 2px; color: #cbbfe0; margin-bottom: 8px; opacity: .8; }
+    .shopGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; }
+    .upgCard { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 12px 10px; text-align: center; }
+    .upgCard .ic { font-size: 26px; line-height: 1.1; }
+    .upgCard .nm { font-size: 13px; font-weight: 800; margin-top: 2px; }
+    .upgCard .lv { font-size: 11px; color: #9fb4ff; margin: 3px 0; }
+    .upgCard .ds { font-size: 11px; color: #bbb; min-height: 14px; }
+    .upgCard .pips { display: flex; gap: 3px; justify-content: center; margin: 6px 0 2px; flex-wrap: wrap; }
+    .upgCard .pip { width: 8px; height: 6px; border-radius: 2px; background: rgba(255,255,255,.18); }
+    .upgCard .pip.on { background: var(--gold); }
+    .buyBtn { pointer-events: auto; cursor: pointer; border: none; outline: none; margin-top: 8px; width: 100%; padding: 7px 0; border-radius: 8px; font-weight: 800; font-size: 12px; color: #4a2600; background: linear-gradient(180deg, #ffe259, #ffa751); }
+    .buyBtn:disabled { cursor: default; opacity: .45; filter: grayscale(.5); }
+    .buyBtn.owned { background: rgba(90,255,140,.2); color: #7dff9b; border: 1px solid rgba(90,255,140,.4); opacity: 1; filter: none; }
+    .buyBtn.max { background: rgba(255,255,255,.1); color: #aaa; opacity: 1; filter: none; }
+    .wpnCard.selected { border-color: var(--blue); box-shadow: 0 0 14px rgba(58,160,255,.35); background: rgba(58,160,255,.15); }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="hud">
+    <div id="topbar">
+      <div id="levelTag">0m</div>
+      <div id="progressTrack"><div id="progressFill"></div></div>
+      <div id="progressFlag">👹</div>
+    </div>
+    <div id="bossbar">
+      <div class="label">BOSS</div>
+      <div class="track"><div class="fill"></div></div>
+    </div>
+    <div id="countBadge">5</div>
+    <div id="buffRow"></div>
+    <div id="weaponTag">🔫 步枪</div>
+    <div id="banner"></div>
+    <button id="muteBtn" title="静音">🔊</button>
+    <button id="pauseBtn" title="暂停 (Esc)">⏸</button>
+  </div>
+  <div id="flash"></div>
+
+  <div id="joyBase"><div id="joyKnob"></div></div>
+
+  <div id="menuOverlay" class="overlay visible">
+    <h1>末日之门</h1>
+    <div class="sub">
+      无尽模式：拖动 / 方向键 左右移动小队，穿过 <b class="blue">蓝色增益门</b>，避开 <b class="red">红色削弱门</b><br />
+      <b class="red">负数门</b>可以被子弹打回正数；<b class="gold">武器门</b>上的倒计数被打到 0 立即激活！<br />
+      僵尸潮会越来越汹涌，每隔一段路还有 <b class="red">BOSS</b> 拦路 —— 看你能跑多远 🧟
+    </div>
+    <div id="charLoadStatus"></div>
+    <div id="charSelect">
+      <div class="charCard selected" data-skin="soldier">
+        <span class="emoji">🪖</span>
+        <div class="name">默认士兵</div>
+        <div class="desc">方块小人大军</div>
+      </div>
+      <div class="charCard" data-skin="gugugaga">
+        <span class="emoji">🐧</span>
+        <div class="name">咕咕嘎嘎</div>
+        <div class="desc">企鹅娘小队</div>
+        <div class="sfxHint">🎧 点我听叫声</div>
+      </div>
+    </div>
+    <div id="menuCoins">💰 <b id="menuCoinNum">0</b> 末日币</div>
+    <button id="startBtn" class="btn">开始行动</button>
+    <button id="shopBtn" class="btn secondary">🛒 兵工厂（升级 / 解锁武器）</button>
+  </div>
+
+  <div id="shopOverlay" class="overlay">
+    <h2>🛒 兵 工 厂</h2>
+    <div class="shopCoins">💰 <b id="shopCoinNum">0</b> 末日币</div>
+    <div class="shopSection">
+      <div class="secTitle">永久升级（局外成长，永久生效）</div>
+      <div class="shopGrid" id="upgradeGrid"></div>
+    </div>
+    <div class="shopSection">
+      <div class="secTitle">武器库（购买解锁 · 点击已解锁武器设为初始武器）</div>
+      <div class="shopGrid" id="weaponGrid"></div>
+    </div>
+    <button id="shopCloseBtn" class="btn">返回</button>
+  </div>
+
+  <div id="resultOverlay" class="overlay">
+    <h2 id="resultTitle">胜利！</h2>
+    <div id="resultStats"></div>
+    <button id="resultBtn" class="btn">下一关</button>
+    <button id="resetBtn" class="btn secondary">回到第 1 关</button>
+  </div>
+
+  <div id="pauseOverlay" class="overlay">
+    <div id="pausePanel">
+      <h2>⏸ 已暂停</h2>
+      <button id="pauseResume" class="btn">继续游戏</button>
+      <button id="pauseRestart" class="btn secondary">重新开始</button>
+      <button id="pauseMute" class="btn secondary">🔊 静音切换</button>
+      <button id="pauseMenu" class="btn secondary">返回主菜单</button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
