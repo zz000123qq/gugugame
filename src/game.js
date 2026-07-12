@@ -42,6 +42,7 @@ for (const card of charCards) {
     card.classList.add('selected');
     const skin = card.dataset.skin;
     state.characterSkin = skin;
+    ui.penguinFacingWrap.style.display = (skin === 'gugugaga') ? '' : 'none';
     sfx.ensure();
     if (skin === 'gugugaga') {
       sfx.voice('gugu_happy');   // 每次点都来一声 AI 人声，连点更欢
@@ -81,6 +82,24 @@ for (const card of charCards) {
       sfx.voice('gugu_cute');
     });
   }
+}
+
+// 企鹅朝向切换（面向镜头看脸 / 背向奔跑）
+for (const btn of ui.penguinFacingWrap.querySelectorAll('.segBtn')) {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    state.penguinFacing = btn.dataset.facing;
+    if (typeof localStorage !== 'undefined') localStorage.setItem('dg_penguinFacing', state.penguinFacing);
+    for (const b of ui.penguinFacingWrap.querySelectorAll('.segBtn')) b.classList.toggle('selected', b === btn);
+    // 实时生效：当前正用企鹅皮肤则立即翻转（游戏中或已就绪）
+    if (state.characterSkin === 'gugugaga') {
+      soldierCrowd.facing = state.penguinFacing === 'forward' ? Math.PI : 0;
+    }
+  });
+}
+// 初始化：按已保存偏好高亮朝向按钮
+for (const b of ui.penguinFacingWrap.querySelectorAll('.segBtn')) {
+  b.classList.toggle('selected', b.dataset.facing === state.penguinFacing);
 }
 
 // ============================================================ 敌人生成
@@ -150,12 +169,14 @@ export function cleanupBehind() {
 export function startRun() {
   // ---- 皮肤切换：根据开局选择替换士兵群渲染器（仅在皮肤变化时执行）----
   if (state.characterSkin === 'gugugaga') {
+    soldierCrowd.facing = state.penguinFacing === 'forward' ? Math.PI : 0; // 企鹅朝向
     if (!gugugagaParts) gugugagaParts = penguinParts(); // 模型未就绪时方块版兜底
     if (appliedSkin !== 'gugugaga') {
       swapSkin(soldierCrowd, scene, gugugagaParts, MAX_SOLDIER_RENDER);
       appliedSkin = 'gugugaga';
     }
   } else {
+    soldierCrowd.facing = 0; // 士兵始终正向
     if (appliedSkin !== 'soldier') {
       swapSkin(soldierCrowd, scene, soldierParts(), MAX_SOLDIER_RENDER);
       appliedSkin = 'soldier';

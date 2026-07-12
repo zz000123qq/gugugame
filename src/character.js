@@ -8,6 +8,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
+const PENGUIN_MODEL_YAW = 0; // 企鹅 GLB 基础朝向偏置（弧度）。若网页上 AI 企鹅在「面向镜头」时显示的是后背，改为 Math.PI
+
 const _loader = new GLTFLoader();
 const TARGET_HEIGHT = 1.15; // 与士兵同高，队伍风格统一
 
@@ -62,6 +64,7 @@ function gltfToParts(root) {
       geo = mergeGeometries(geoms, false);
     }
     normalizeGeo(geo);
+    geo.rotateY(PENGUIN_MODEL_YAW); // 统一朝向：让 GLB 正面指向 +z，与方块企鹅一致，便于「面向镜头/背向奔跑」切换
     parts.push({
       geometry: geo,
       material: material ? material.clone() : new THREE.MeshStandardMaterial(),

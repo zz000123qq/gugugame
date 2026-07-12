@@ -10,6 +10,7 @@ const _mat = new THREE.Matrix4();
 export class CrowdRenderer {
   constructor(scene, parts, maxCount) {
     this.maxCount = maxCount;
+    this.facing = 0; // 朝向偏置（弧度）：每只个体绕自身竖轴旋转，用于企鹅「面向镜头/背向奔跑」切换
     this.meshes = parts.map((p) => {
       const mesh = new THREE.InstancedMesh(p.geometry, p.material, maxCount);
       mesh.castShadow = true;
@@ -36,7 +37,7 @@ export class CrowdRenderer {
       const a = agents[i];
       const bob = Math.abs(Math.sin(time * bobSpeed + a.phase)) * bobAmp;
       _dummy.position.set(a.x, (a.y ?? 0) + bob, a.z);
-      _dummy.rotation.set(Math.sin(time * bobSpeed + a.phase) * 0.06, a.rotY ?? 0, 0);
+      _dummy.rotation.set(Math.sin(time * bobSpeed + a.phase) * 0.06, (a.rotY ?? 0) + this.facing, 0);
       const s = a.scale ?? 1;
       _dummy.scale.set(s, s, s);
       _dummy.updateMatrix();

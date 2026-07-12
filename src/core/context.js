@@ -78,6 +78,8 @@ export const state = {
   spinTime: 0,
   // 角色皮肤: 'soldier' | 'gugugaga'
   characterSkin: 'soldier',
+  // 企鹅朝向: 'camera'（面向镜头/看脸，默认）| 'forward'（背向奔跑/真实但看不到脸）
+  penguinFacing: (typeof localStorage !== 'undefined' && localStorage.getItem('dg_penguinFacing')) || 'camera',
   // 局外成长效果快照（开局由 progression 写入，热循环直接读取）
   powerMult: 1,   // 火力倍率（伤害）
   medkitMult: 1,  // 增援量倍率
@@ -122,6 +124,7 @@ export const ui = {
   joyBase: document.getElementById('joyBase'),
   joyKnob: document.getElementById('joyKnob'),
   charSelect: document.getElementById('charSelect'),
+  penguinFacingWrap: document.getElementById('penguinFacingWrap'),
   charLoadStatus: document.getElementById('charLoadStatus'),
 };
 ui.resetBtn.style.display = 'none'; // 无尽模式没有"回到第 1 关"

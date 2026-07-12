@@ -217,6 +217,12 @@
     .charCard .desc { font-size: 11px; color: #999; margin-top: 3px; }
     .charCard .sfxHint { font-size: 10px; color: var(--gold); margin-top: 6px; opacity: .7; }
     .charCard.selected .sfxHint { opacity: 1; }
+  #penguinFacingWrap { margin-top: 10px; text-align: center; }
+  .facingLabel { font-size: 11px; color: #9aa; margin-bottom: 6px; }
+  .seg { display: inline-flex; gap: 6px; background: rgba(0,0,0,.3); padding: 4px; border-radius: 10px; }
+  .segBtn { border: 1px solid transparent; background: transparent; color: #bbb; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 7px; cursor: pointer; transition: .15s; }
+  .segBtn:hover { color: #fff; }
+  .segBtn.selected { border-color: var(--blue); background: rgba(58,160,255,.2); color: #fff; box-shadow: 0 0 10px rgba(58,160,255,.3); }
     #charLoadStatus { font-size: 13px; color: var(--gold); min-height: 20px; margin-bottom: 8px; }
 
     /* ---------- 兵工厂 / 商店 ---------- */
@@ -288,6 +294,13 @@
         <div class="name">咕咕嘎嘎</div>
         <div class="desc">企鹅娘小队</div>
         <div class="sfxHint">🎧 点我听叫声</div>
+      </div>
+      <div id="penguinFacingWrap" style="display:none">
+        <div class="facingLabel">🐧 朝向（看脸 or 真实奔跑）</div>
+        <div class="seg">
+          <button type="button" class="segBtn selected" data-facing="camera">面向镜头</button>
+          <button type="button" class="segBtn" data-facing="forward">背向奔跑</button>
+        </div>
       </div>
     </div>
     <div id="menuCoins">💰 <b id="menuCoinNum">0</b> 末日币</div>
